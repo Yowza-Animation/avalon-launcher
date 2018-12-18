@@ -57,4 +57,36 @@ Flow {
             onClicked: controller.trigger_action(actionRepeater.model.index(index, null))
         }
     }
+    Repeater {
+        id: actionRepeaterImage
+        model: actionLayout.model
+
+        delegate: ItemDelegate {
+            id: control
+
+            padding: 0
+            width: 55
+            height: 65
+            contentItem: ColumnLayout {
+
+                ImageAction {
+
+                    property int availableWidth: control.availableWidth
+                    name: model.icon
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: actiontext.top
+                }
+            }
+
+            background: Rectangle {
+                opacity: control.down ? 0.3 : 0.0
+                color: "white"
+            }
+
+            onClicked: controller.trigger_action(actionRepeater.model.index(index, null))
+        }
+    }
+
 }
