@@ -1,4 +1,5 @@
 import QtQuick 2.6
+import "icons.js" as Icons
 
 Item {
     id: root
@@ -7,6 +8,8 @@ Item {
 
     property bool rotate: root.name.match(/.*-rotate/) !== null
     property bool shadow: false
+
+    property var icons: Icons.map
 
     width: 28
     height: 28
@@ -18,7 +21,7 @@ Item {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
 
-        source: name
+        source: root.icons.hasOwnProperty(name) ? res_path+root.icons[name] : ""
         fillMode: Image.PreserveAspectFit
 
         NumberAnimation on rotation {
