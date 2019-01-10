@@ -283,7 +283,12 @@ class Controller(QtCore.QObject):
         apps = lib.get_apps(project)
         self._registered_actions[:] = actions + apps
 
-        silos = io.distinct("silo")
+        silos = [s['name'] for s in io.find({"type": "asset", "silo": None})]
+        silos_old = io.distinct("silo")
+        for silo in silos_old:
+            if silo not in silos and silo is not None:
+                silos.append(silo)
+
         self._model.push([
             dict({
                 "name": silo,
@@ -359,7 +364,8 @@ class Controller(QtCore.QObject):
         # TODO(marcus): These are going to be accessible
         # from database, not from the environment.
         asset = io.find_one({"_id": frame["asset"]})
-        api.Session["AVALON_HIERARCHY"] = asset["data"]["hierarchy"]
+        if "hierarchy" in asset["data"]:
+            api.Session["AVALON_HIERARCHY"] = asset["data"]["hierarchy"]
 
         frame["environment"].update({
             "asset_%s" % key: value
