@@ -45,8 +45,7 @@ class LoaderLibrary(api.Action):
 
     def process(self, session, **kwargs):
         return lib.launch(executable="python",
-                          args=["-u", "-m", "avalon.tools.libraryloader",
-                                session['AVALON_PROJECT']])
+                          args=["-u", "-m", "avalon.tools.libraryloader"])
 
 
 def register_default_actions():
