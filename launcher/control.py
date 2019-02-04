@@ -283,7 +283,13 @@ class Controller(QtCore.QObject):
         apps = lib.get_apps(project)
         self._registered_actions[:] = actions + apps
 
-        silos = io.distinct("silo")
+        silos = [s['name'] for s in io.find({"type": "asset", "silo": None})]
+        # backwards compatible
+        silos_old = io.distinct("silo")
+        for silo in silos_old:
+            if silo not in silos and silo is not None:
+                silos.append(silo)
+
         self._model.push([
             dict({
                 "name": silo,
