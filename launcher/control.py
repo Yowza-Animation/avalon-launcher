@@ -512,11 +512,19 @@ class Controller(QtCore.QObject):
 
         name = model.data(index, "name")
 
+        return self.run_action_by_name(name)
+
+    def run_action_by_name(self, name):
         # Get the action
         Action = next((a for a in self._registered_actions if a.name == name),
                       None)
         assert Action, "No action found"
         action = Action()
+
+        # Run preactions
+        if hasattr(action, 'preactions') and action.preactions is not None:
+            for preaction in action.preactions:
+                self.run_action_by_name(preaction)
 
         # Run the action within current session
         self.log("Running action: %s" % name, level=INFO)
