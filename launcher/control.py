@@ -3,6 +3,7 @@ import sys
 import copy
 import traceback
 import contextlib
+import psutil
 
 from PyQt5 import QtCore
 
@@ -400,9 +401,9 @@ class Controller(QtCore.QObject):
 
         if 'visualParent' in entity['data']:
             docs = io.find({
-                    "type": "asset",
-                    "data.visualParent": entity["_id"]
-                })
+                "type": "asset",
+                "data.visualParent": entity["_id"]
+            })
         else:
             docs = io.find({
                 "type": "asset",
@@ -507,11 +508,47 @@ class Controller(QtCore.QObject):
         self._model.push([])
         self.pushed.emit(name)
 
+    def is_running(self, filename):
+        procs = [p for p in psutil.process_iter() if (
+            'python.exe' in p.name() and
+            filename in p.cmdline()
+        )]
+
+        if len(procs) > 0:
+            return True
+        return False
+
     @Slot(QtCore.QModelIndex)
     def trigger_action(self, index):
 
         name = model.data(index, "name")
+        aport_names = ['premiere', 'aport']
+        name_match = False
+        for a_name in aport_names:
+            if a_name in name:
+                name_match = True
+                break
+        if (
+            name_match and
+            os.environ.get('AVALON_CORE', None) is not None
+        ):
+            aport_name = 'aport'
+            av_core_path = os.environ['AVALON_CORE']
+            path_items = [
+                av_core_path, 'setup', 'aport', 'pythonpath', 'init.py'
+            ]
+            aport_path = os.path.sep.join(path_items)
+            if self.is_running(aport_path):
+                self.log("Aport server is already running")
 
+            elif name == aport_name:
+                return self.run_action(aport_name)
+            else:
+                self.run_action(aport_name)
+
+        return self.run_action(name)
+
+    def run_action(self, name):
         # Get the action
         Action = next((a for a in self._registered_actions if a.name == name),
                       None)
