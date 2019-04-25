@@ -420,8 +420,10 @@ class Controller(QtCore.QObject):
         # TODO(marcus): These are going to be accessible
         # from database, not from the environment.
         asset = io.find_one({"_id": frame["asset"]})
-        if "hierarchy" in asset["data"]:
-            api.Session["AVALON_HIERARCHY"] = asset["data"]["hierarchy"]
+        if "parents" in asset["data"]:
+            api.Session["AVALON_HIERARCHY"] = "/".join(
+                asset["data"]["parents"]
+            )
         frame.update(asset)
         frame["environment"].update({
             "asset_%s" % key: value
