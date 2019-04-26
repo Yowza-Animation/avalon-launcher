@@ -39,8 +39,8 @@ class Launcher(QtWidgets.QWidget):
         install()
 
         terminal.init()
-        app_root = os.environ['PYPE_APP_ROOT'].replace('\\', '/')
-        res_path = "file:///{}/resources/".format(app_root)
+        app_root = os.path.dirname(__file__).replace('\\', '/')
+        res_path = "file:///{}/res/".format(app_root)
 
         controller = control.Controller(root, self)
         engine.rootContext().setContextProperty("controller", controller)
