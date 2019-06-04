@@ -124,6 +124,8 @@ class Controller(QtCore.QObject):
                 hierarchy = frame['data'].get('hierarchy', None)
                 if hierarchy is not None:
                     frame['environment']['hierarchy'] = hierarchy
+            if frame.get('type') == 'task':
+                frame['environment']['task'] = frame['name']
             template = config['template']['work']
             path = lib.partial_format(template, frame["environment"])
         else:
