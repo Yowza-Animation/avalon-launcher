@@ -116,12 +116,14 @@ class Controller(QtCore.QObject):
         config = frame.get("config", None)
         if config is None:
             print("No project found in configuration")
-            return
 
-        template = config['template']['work']
-        path = lib.partial_format(template, frame["environment"])
         # Get the current environment
-        frame["environment"]["root"] = self._root
+        if 'environment' in frame:
+            frame["environment"]["root"] = self._root
+            template = config['template']['work']
+            path = lib.partial_format(template, frame["environment"])
+        else:
+            path = self._root
 
         # Keep only the part of the path that was formatted
         path = os.path.normpath(path.split("{", 1)[0])
