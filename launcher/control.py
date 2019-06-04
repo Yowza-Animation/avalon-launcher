@@ -110,9 +110,7 @@ class Controller(QtCore.QObject):
 
         print("Opening Explorer")
 
-        # Get the current environment
         frame = self.current_frame()
-        frame["environment"]["root"] = self._root
 
         # When we are outside of any project, do nothing
         config = frame.get("config", None)
@@ -122,6 +120,8 @@ class Controller(QtCore.QObject):
 
         template = config['template']['work']
         path = lib.partial_format(template, frame["environment"])
+        # Get the current environment
+        frame["environment"]["root"] = self._root
 
         # Keep only the part of the path that was formatted
         path = os.path.normpath(path.split("{", 1)[0])
