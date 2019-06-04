@@ -301,7 +301,12 @@ class Controller(QtCore.QObject):
 
         frame = project
         frame["project"] = project["_id"]
-        frame["environment"] = {"project": name}
+        frame["environment"] = {
+            "project": {
+                'name': name,
+                'code': project.get('data', {}).get('code')
+            }
+        }
         frame["environment"].update({
             "project_%s" % key: str(value)
             for key, value in project["data"].items()
