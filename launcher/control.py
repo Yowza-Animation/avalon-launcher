@@ -120,6 +120,10 @@ class Controller(QtCore.QObject):
         # Get the current environment
         if 'environment' in frame:
             frame["environment"]["root"] = self._root
+            if frame.get('type') in ['asset', 'task']:
+                hierarchy = frame['data'].get('hierarchy', None)
+                if hierarchy is not None:
+                    frame['environment']['hierarchy'] = hierarchy
             template = config['template']['work']
             path = lib.partial_format(template, frame["environment"])
         else:
