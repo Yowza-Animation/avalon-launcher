@@ -110,18 +110,26 @@ class Controller(QtCore.QObject):
 
         print("Opening Explorer")
 
-        # Get the current environment
         frame = self.current_frame()
-        frame["environment"]["root"] = self._root
 
         # When we are outside of any project, do nothing
         config = frame.get("config", None)
         if config is None:
             print("No project found in configuration")
-            return
 
-        template = config['template']['work']
-        path = lib.partial_format(template, frame["environment"])
+        # Get the current environment
+        if 'environment' in frame:
+            frame["environment"]["root"] = self._root
+            if frame.get('type') in ['asset', 'task']:
+                hierarchy = frame['data'].get('hierarchy', None)
+                if hierarchy is not None:
+                    frame['environment']['hierarchy'] = hierarchy
+            if frame.get('type') == 'task':
+                frame['environment']['task'] = frame['name']
+            template = config['template']['work']
+            path = lib.partial_format(template, frame["environment"])
+        else:
+            path = self._root
 
         # Keep only the part of the path that was formatted
         path = os.path.normpath(path.split("{", 1)[0])
@@ -301,7 +309,12 @@ class Controller(QtCore.QObject):
 
         frame = project
         frame["project"] = project["_id"]
-        frame["environment"] = {"project": name}
+        frame["environment"] = {
+            "project": {
+                'name': name,
+                'code': project.get('data', {}).get('code')
+            }
+        }
         frame["environment"].update({
             "project_%s" % key: str(value)
             for key, value in project["data"].items()
