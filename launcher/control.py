@@ -294,18 +294,32 @@ class Controller(QtCore.QObject):
         apps = lib.get_apps(project)
         self._registered_actions[:] = actions + apps
 
-        silos = [s['name'] for s in io.find({"type": "asset", "silo": None})]
-        silos_old = io.distinct("silo")
-        for silo in silos_old:
-            if silo not in silos and silo is not None:
-                silos.append(silo)
-        self._model.push([
-            dict({
-                "name": silo,
-                "icon": DEFAULTS["icon"]["silo"],
-            })
-            for silo in sorted(silos)
-        ])
+        db_assets = io.find({"type": "asset"})
+        # Backwadrs compatbility with silo
+        silos = db_assets.distinct("silo")
+        if silos and None in silos:
+            silos = None
+
+        if not silos:
+            assets = list()
+            for asset in db_assets.sort("name", 1):
+                # _not_set_ is for cases when visualParent is not used
+                vis_p = asset.get("data", {}).get("visualParent", "_not_set_")
+                if vis_p is None:
+                    assets.append(asset)
+                elif vis_p == "_not_set_":
+                    assets.append(asset)
+
+            self._model.push([dict({
+                "_id": asset["_id"],
+                "name": asset["name"],
+                "icon": DEFAULTS["icon"]["asset"]
+            }) for asset in assets])
+
+        else:
+            self._model.push([dict({
+                "name": silo, "icon": DEFAULTS["icon"]["silo"]
+            }) for silo in sorted(silos)])
 
         frame = project
         frame["project"] = project["_id"]
@@ -406,7 +420,7 @@ class Controller(QtCore.QObject):
         frame["asset"] = model.data(index, "_id")
         frame["environment"]["asset"] = name
 
-        if entity["silo"] is None:
+        if entity.get("silo") is None:
             api.Session["AVALON_SILO"] = name
             frame["environment"]["silo"] = name
             frame["asset"] = entity["_id"]
@@ -481,7 +495,7 @@ class Controller(QtCore.QObject):
             if "visualParent" not in doc["data"]:
                 continue
 
-            if entity["silo"] is None and doc["data"]["visualParent"] is None:
+            if entity.get("silo") is None and doc["data"]["visualParent"] is None:
                 valid_docs.append(
                     dict(
                         {
