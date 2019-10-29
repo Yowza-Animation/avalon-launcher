@@ -73,6 +73,7 @@ class Controller(QtCore.QObject):
             roles=[
                 "_id",
                 "name",
+                "type",
                 "label",
                 "icon",
                 "group"
@@ -202,7 +203,7 @@ class Controller(QtCore.QObject):
         if frame:
             handler = {
                 "project": self.on_asset_changed,
-                "silo": self.on_asset_changed,
+                "silo": self.on_silo_changed,
                 "asset": self.on_asset_changed
             }[frame["type"]]
             if "tasks" in frame and name in frame["tasks"]:
@@ -260,6 +261,7 @@ class Controller(QtCore.QObject):
             dict({
                 "_id": project["_id"],
                 "icon": DEFAULTS["icon"]["project"],
+                "type": project["type"],
                 "name": project["name"],
             }, **project["data"])
             for project in sorted(io.projects(), key=lambda x: x['name'])
@@ -313,12 +315,13 @@ class Controller(QtCore.QObject):
             self._model.push([dict({
                 "_id": asset["_id"],
                 "name": asset["name"],
+                "type": asset["type"],
                 "icon": DEFAULTS["icon"]["asset"]
             }) for asset in assets])
 
         else:
             self._model.push([dict({
-                "name": silo, "icon": DEFAULTS["icon"]["silo"]
+                "name": silo, "icon": DEFAULTS["icon"]["silo"], "type": "silo"
             }) for silo in sorted(silos)])
 
         frame = project
@@ -377,6 +380,7 @@ class Controller(QtCore.QObject):
                         {
                             "_id": doc["_id"],
                             "name": doc["name"],
+                            "type": doc["type"],
                             "icon": DEFAULTS["icon"]["asset"]
                         },
                         **doc["data"]
@@ -387,6 +391,7 @@ class Controller(QtCore.QObject):
                     {
                         "_id": doc["_id"],
                         "name": doc["name"],
+                        "type": doc["type"],
                         "icon": DEFAULTS["icon"]["asset"]
                     },
                     **doc["data"]
@@ -403,16 +408,16 @@ class Controller(QtCore.QObject):
         self.pushed.emit(name)
 
     def on_asset_changed(self, index):
+        # Backwards compatible way
+        _type = model.data(index, "type")
+        if _type == "silo":
+            return self.on_silo_changed(index)
+
         name = model.data(index, "name")
         entity = io.find_one({
             "type": "asset",
             "name": name
         })
-        # Backwards compatible way
-        if entity is None:
-            self.on_silo_changed(index)
-            return
-
         api.Session["AVALON_ASSET"] = name
 
         frame = self.current_frame()
@@ -501,6 +506,7 @@ class Controller(QtCore.QObject):
                         {
                             "_id": doc["_id"],
                             "name": doc["name"],
+                            "type": doc["type"],
                             "icon": DEFAULTS["icon"]["asset"]
                         },
                         **doc["data"]
@@ -512,6 +518,7 @@ class Controller(QtCore.QObject):
                         {
                             "_id": doc["_id"],
                             "name": doc["name"],
+                            "type": doc["type"],
                             "icon": DEFAULTS["icon"]["asset"]
                         },
                         **doc["data"]
