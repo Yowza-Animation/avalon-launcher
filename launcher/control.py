@@ -203,7 +203,7 @@ class Controller(QtCore.QObject):
         if frame:
             handler = {
                 "project": self.on_asset_changed,
-                "silo": self.on_silo_changed,
+                "silo": self.on_asset_changed,
                 "asset": self.on_asset_changed
             }[frame["type"]]
             if "tasks" in frame and name in frame["tasks"]:
@@ -374,30 +374,21 @@ class Controller(QtCore.QObject):
             if not doc["data"].get("visible", True):
                 continue
 
-            if "visualParent" not in doc["data"]:
-                valid_docs.append(
-                    dict(
-                        {
-                            "_id": doc["_id"],
-                            "name": doc["name"],
-                            "type": doc["type"],
-                            "icon": DEFAULTS["icon"]["asset"]
-                        },
-                        **doc["data"]
-                    )
-                )
-            else:
-                data = dict(
-                    {
-                        "_id": doc["_id"],
-                        "name": doc["name"],
-                        "type": doc["type"],
-                        "icon": DEFAULTS["icon"]["asset"]
-                    },
-                    **doc["data"]
-                )
+            data = {
+                "_id": doc["_id"],
+                "name": doc["name"],
+                "icon": DEFAULTS["icon"]["asset"]
+            }
+            data.update(doc["data"])
+
+            if "visualParent" in doc["data"]:
+                vis_par = doc["data"]["visualParent"]
+                if vis_par is not None:
+                    continue
+
+            if "label" not in data:
                 data["label"] = doc["name"]
-                valid_docs.append(data)
+            valid_docs.append(data)
 
         frame["environment"]["silo"] = name
         frame["name"] = name
