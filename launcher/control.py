@@ -75,7 +75,8 @@ class Controller(QtCore.QObject):
                 "name",
                 "label",
                 "icon",
-                "group"
+                "group",
+                "type"
             ])
 
         self._actions = model.Model(
@@ -261,6 +262,7 @@ class Controller(QtCore.QObject):
                 "_id": project["_id"],
                 "icon": DEFAULTS["icon"]["project"],
                 "name": project["name"],
+                "type": "project"
             }, **project["data"])
             for project in sorted(io.projects(), key=lambda x: x['name'])
             if project["data"].get("visible", True)  # Discard hidden projects
@@ -313,12 +315,13 @@ class Controller(QtCore.QObject):
             self._model.push([dict({
                 "_id": asset["_id"],
                 "name": asset["name"],
-                "icon": DEFAULTS["icon"]["asset"]
+                "icon": DEFAULTS["icon"]["asset"],
+                "type": "asset"
             }) for asset in assets])
 
         else:
             self._model.push([dict({
-                "name": silo, "icon": DEFAULTS["icon"]["silo"]
+                "name": silo, "icon": DEFAULTS["icon"]["silo"], "type": "silo"
             }) for silo in sorted(silos)])
 
         frame = project
@@ -371,28 +374,23 @@ class Controller(QtCore.QObject):
             if not doc["data"].get("visible", True):
                 continue
 
-            if "visualParent" not in doc["data"]:
-                valid_docs.append(
-                    dict(
-                        {
-                            "_id": doc["_id"],
-                            "name": doc["name"],
-                            "icon": DEFAULTS["icon"]["asset"]
-                        },
-                        **doc["data"]
-                    )
-                )
-            else:
-                data = dict(
-                    {
-                        "_id": doc["_id"],
-                        "name": doc["name"],
-                        "icon": DEFAULTS["icon"]["asset"]
-                    },
-                    **doc["data"]
-                )
+            if (
+                "visualParent" in doc["data"] and
+                doc["data"]["visualParent"] is not None
+            ):
+                continue
+
+            data = {
+                "_id": doc["_id"],
+                "name": doc["name"],
+                "icon": DEFAULTS["icon"]["asset"]
+            }
+            data.update(doc["data"])
+
+            if "label" not in data:
                 data["label"] = doc["name"]
-                valid_docs.append(data)
+
+            valid_docs.append(data)
 
         frame["environment"]["silo"] = name
         frame["name"] = name
@@ -403,15 +401,17 @@ class Controller(QtCore.QObject):
         self.pushed.emit(name)
 
     def on_asset_changed(self, index):
+        _type = model.data(index, "type")
+        # Backwards compatible way
+        if _type == "silo":
+            self.on_silo_changed(index)
+            return
+
         name = model.data(index, "name")
         entity = io.find_one({
             "type": "asset",
             "name": name
         })
-        # Backwards compatible way
-        if entity is None:
-            self.on_silo_changed(index)
-            return
 
         api.Session["AVALON_ASSET"] = name
 
