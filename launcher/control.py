@@ -62,7 +62,7 @@ class Controller(QtCore.QObject):
     # The hierarchy was navigated, either forwards or backwards
     navigated = Signal()
 
-    def __init__(self, root, parent=None):
+    def __init__(self, root=None, parent=None):
         super(Controller, self).__init__(parent)
 
         self._root = root
@@ -109,6 +109,9 @@ class Controller(QtCore.QObject):
         migrate to another module"""
         # Todo: find a cleaner way, with .toml file for example
 
+        if self._root is None:
+            print("Explorer can't be opened because root is not set.")
+            return
         print("Opening Explorer")
 
         frame = self.current_frame()
@@ -609,7 +612,6 @@ class Controller(QtCore.QObject):
             # Build a session from current frame
             session = {"AVALON_{}".format(key.upper()): value for
                        key, value in frame.get("environment", {}).items()}
-            session["AVALON_PROJECTS"] = api.registered_root()
 
             if not Action().is_compatible(session):
                 continue

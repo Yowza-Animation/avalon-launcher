@@ -21,7 +21,7 @@ ICON_PATH = lib.resource("icon", "main.png")
 
 class Launcher(QtWidgets.QWidget):
 
-    def __init__(self, root, source):
+    def __init__(self, source, root=None):
         super(Launcher, self).__init__()#sys.argv)
 
         engine = QtQml.QQmlApplicationEngine()
