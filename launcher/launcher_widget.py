@@ -21,7 +21,7 @@ ICON_PATH = lib.resource("icon", "main.png")
 
 class Launcher(QtWidgets.QWidget):
 
-    def __init__(self, root, source):
+    def __init__(self, source, root=None):
         super(Launcher, self).__init__()#sys.argv)
 
         engine = QtQml.QQmlApplicationEngine()
@@ -39,10 +39,13 @@ class Launcher(QtWidgets.QWidget):
         install()
 
         terminal.init()
+        app_root = os.path.dirname(__file__).replace('\\', '/')
+        res_path = "file:///{}/res/".format(app_root)
 
         controller = control.Controller(root, self)
         engine.rootContext().setContextProperty("controller", controller)
         engine.rootContext().setContextProperty("terminal", terminal.model)
+        engine.rootContext().setContextProperty("res_path", res_path)
 
         self._tray = None
         self.window = None

@@ -34,10 +34,25 @@ class LoaderAction(api.Action):
                                 session['AVALON_PROJECT']])
 
 
+class LoaderLibrary(api.Action):
+    name = "loader_os"
+    label = "Library Loader"
+    icon = "book"
+    order = 997     # at the end
+
+    def is_compatible(self, session):
+        return True
+
+    def process(self, session, **kwargs):
+        return lib.launch(executable="python",
+                          args=["-u", "-m", "avalon.tools.libraryloader"])
+
+
 def register_default_actions():
     """Register default actions for Launcher"""
     api.register_plugin(api.Action, ProjectManagerAction)
     api.register_plugin(api.Action, LoaderAction)
+    api.register_plugin(api.Action, LoaderLibrary)
 
 
 def register_config_actions():
