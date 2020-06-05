@@ -5,5 +5,6 @@ var map = {
     "maya_icon": "action_icons/maya.png",
     "houdini_icon": "action_icons/houdini.png",
     "harmony_icon": "action_icons/harmony.png",
-    "python_icon": "action_icons/python.png",
+    "storyboardpro_icon": "action_icons/storyboardpro.png",
+    "python_icon": "action_icons/python.png"
 }
