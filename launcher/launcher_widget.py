@@ -47,11 +47,12 @@ class Launcher(QtWidgets.QWidget):
         engine.rootContext().setContextProperty("terminal", terminal.model)
         engine.rootContext().setContextProperty("res_path", res_path)
 
+        self._icon = QtGui.QIcon(ICON_PATH)
         self._tray = None
         self.window = None
         self.engine = engine
         self.controller = controller
-        self.window = object
+        # self.window = object
         self.controller.init()
         engine.load(QtCore.QUrl.fromLocalFile(source))
 
@@ -60,6 +61,7 @@ class Launcher(QtWidgets.QWidget):
             print("Could not load QML file..")
             sys.exit(1)
         else:
+            object.setIcon(self._icon)
             self.window = object
             self.controller.init()
 
