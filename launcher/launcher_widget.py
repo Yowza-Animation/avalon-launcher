@@ -6,7 +6,7 @@ import sys
 
 # Dependencies
 from avalon import io
-from PyQt5 import QtCore, QtGui, QtQml, QtWidgets, QtQuick
+from PyQt5 import QtCore, QtGui, QtQml, QtWidgets
 
 # Local libraries
 from . import control, terminal, lib
@@ -22,7 +22,7 @@ ICON_PATH = lib.resource("icon", "main.png")
 class Launcher(QtWidgets.QWidget):
 
     def __init__(self, source, root=None):
-        super(Launcher, self).__init__()#sys.argv)
+        super(Launcher, self).__init__()
 
         engine = QtQml.QQmlApplicationEngine()
         engine.objectCreated.connect(self.on_object_created)
