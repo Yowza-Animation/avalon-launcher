@@ -33,9 +33,9 @@ Property = QtCore.pyqtProperty
 DEFAULTS = {
     "icon": {
         "project": "map",
-        "silo": "database",
-        "asset": "plus-square",
-        "task": "male",
+        "silo": "star-o",
+        "asset": "box",
+        "task": "calendar-check-o",
         "app": "file",
     }
 }
